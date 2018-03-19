@@ -132,6 +132,16 @@ nav h1 a {
   width: 75%;
 }
 
+@media screen and (min-width:481px)  { 
+   .filter-options {
+     flex-direction: row;
+   }
+   .filter-options select {
+     display: flex;
+     flex-grow: 1;
+   }
+}
+
 /* ====================== Restaurant Listing ====================== */
 
 #restaurants-list {
