@@ -206,6 +206,11 @@ nav h1 a {
   width: 100%;
   z-index: 1000;
 }
+/* adding flex properties to line the contents under each other */ 
+.inside #maincontent{
+  display: flex;
+  flex-wrap: wrap;
+}
 .inside #map-container {
   background: blue none repeat scroll 0 0;
   height: 400px;
