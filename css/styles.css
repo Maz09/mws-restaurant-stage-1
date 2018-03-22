@@ -165,6 +165,11 @@ nav h1 a {
   text-align: left;
   width: 270px;
 }
+@media screen and (max-width:775px)  { 
+   #restaurants-list li {
+     width: 100%;
+   }
+}
 #restaurants-list .restaurant-img {
   background-color: #ccc;
   display: block;
@@ -253,7 +258,7 @@ nav h1 a {
   padding: 2px 0;
   text-align: center;
   text-transform: uppercase;
-	width: 90%;
+  width: 100%;
 }
 #restaurant-container, #reviews-container {
   border-bottom: 1px solid #d9d9d9;
