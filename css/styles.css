@@ -37,7 +37,7 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
 }
 #maincontent {
   background-color: #f3f3f3;
-  min-height: 100%;  
+  min-height: 100%;
 }
 #footer {
   background-color: #444;
@@ -231,7 +231,7 @@ nav h1 a {
 .inside #footer {
   bottom: 0;
   position: absolute;
-  width: 100%;
+  width: calc(100% - 50px);
 }
 #restaurant-name {
   color: #f18200;
