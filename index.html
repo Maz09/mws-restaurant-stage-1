@@ -13,6 +13,7 @@
 
 <body>
   <header>
+    <a href="#restaurants" class="skip-link">Skip Google Map to select a restaurant</a>  
     <nav>
       <h1><a href="/">Restaurant Reviews</a></h1>
     </nav>
@@ -22,7 +23,7 @@
     <section id="map-container">
       <div id="map"></div>
     </section>
-    <section>
+    <section id="restaurants" tabindex="-1">
       <div class="filter-options">
         <h2>Filter Results</h2>
         <select id="neighborhoods-select" name="neighborhoods" onchange="updateRestaurants()">
