@@ -22,8 +22,9 @@ a {
 	text-decoration: none;
 }
 a:hover, a:focus {
-	color: #3397db;
 	text-decoration: none;
+    outline-width: thick;
+    box-shadow: 0 0 8px 3px rgba(255, 255, 255, 0.8);
 }
 a img{
 	border: none 0px #fff;
@@ -147,6 +148,11 @@ nav h1 a {
   width: 75%;
 }
 
+.filter-options select:focus {
+  outline: 5px solid gold;
+  outline-offset: 0px;
+}
+
 @media screen and (min-width:481px)  { 
    .filter-options {
      flex-direction: row;
@@ -217,6 +223,11 @@ nav h1 a {
   text-align: center;
   text-decoration: none;
   text-transform: uppercase;
+}
+#restaurants-list li a:focus {
+  outline-style: none;  
+  background-color: #99aabb;
+  box-shadow: 0 0 8px 3px rgba(50, 60, 70, .6);
 }
 
 /* ====================== Restaurant Details ====================== */
