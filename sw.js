@@ -1,4 +1,4 @@
-let cacheName = 'restaurant-cache-v1';
+let cacheName = 'restaurant-cache-v2';
 let urlsToCache = [
     './',
     './index.html',
@@ -24,6 +24,18 @@ self.addEventListener('install', e => {
     e.waitUntil(
         caches.open(cacheName).then(cache => {
             return cache.addAll(urlsToCache);
+        })
+    );
+});
+
+self.addEventListener('activate', e => {
+    e.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(cacheNames.map(thisCacheName => {
+                if(thisCacheName !== cacheName) {
+                    caches.delete(thisCacheName);
+                }
+            }))      
         })
     );
 });
