@@ -46,6 +46,10 @@
            .catch(function(err){
            console.log("Service Worker Failed to Register", err);
        });
+       
+       navigator.serviceWorker.addEventListener('controllerchange',function(){
+           window.location.reload();
+       });
    }
   </script>
 
