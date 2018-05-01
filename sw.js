@@ -1,3 +1,5 @@
+importScripts('idb.js');
+
 let cacheName = 'restaurant-cache-v2';
 let urlsToCache = [
     './',
