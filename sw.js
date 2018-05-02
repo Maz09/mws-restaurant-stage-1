@@ -70,13 +70,49 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', event => {
+    if (event.request.url === fetchURL){
+        event.respondWith(
+            readDB()
+            .then(function (data_items) {
+                if (!data_items.length) {
+                    return fetch(event.request)
+                    .then(function (response) {
+                        return response.clone().json()
+                        .then(json => {
+                            console.log('fetched from net');
+                            ArrayOfRestaurants = json.slice();
+                            idb.open('restaurants-reviews', 1, function(upgradeDB) {
+                                let store = upgradeDB.createObjectStore('restaurants', { keyPath: 'id'});
+                                ArrayOfRestaurants.forEach(function(restaurant) {
+                                    store.put(restaurant);
+                                });
+                            });
+                            return response;
+                        })
+                    });
+                } else {
+                    console.log('event responds from DB');
+                    let response = new Response(JSON.stringify(data_items), {
+                        headers: new Headers({
+                            'Content-type': 'application/json',
+                            'Access-Control-Allow-Credentials': 'true'
+                        }),
+                        type: 'cors',
+                        status: 200
+                    });
+                    return response;
+                }
+            })
+        );
+        return;
+    }
     event.respondWith(
-      caches.match(event.request)
-      .then(response => {
-        return response || fetchAndCache(event.request);
-      })
+        caches.match(event.request)
+        .then(response => {
+            return response || fetchAndCache(event.request);
+        })
     );
-  });
+});
 
   function fetchAndCache(url) {
     return fetch(url)
