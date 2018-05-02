@@ -21,6 +21,10 @@ let urlsToCache = [
     './img/10.jpg'
 ];
 
+const fetchURL = `http://localhost:1337/restaurants`;
+let ArrayOfRestaurants = [];
+let dbPromise;
+
 self.addEventListener('install', e => {
     e.waitUntil(
         caches.open(cacheName).then(cache => {
