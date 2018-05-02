@@ -91,3 +91,11 @@ self.addEventListener('fetch', event => {
       console.log('Request failed:', error);
     });
   }
+
+  function readDB() {
+    idb.open('restaurants-reviews', 1).then(function(db) {
+      let tx = db.transaction(['restaurants'], 'readonly');
+      let store = tx.objectStore('restaurants');
+      return store.getAll();
+    })
+  }
