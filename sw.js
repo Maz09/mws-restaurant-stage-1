@@ -63,6 +63,12 @@ self.addEventListener('activate', e => {
     );
 });
 
+self.addEventListener('activate', e => {
+    e.waitUntil(
+        createDB(fetchURL)
+    );
+});
+
 self.addEventListener('fetch', event => {
     event.respondWith(
       caches.match(event.request)
