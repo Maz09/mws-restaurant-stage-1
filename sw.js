@@ -9,7 +9,6 @@ let urlsToCache = [
     './js/main.js',
     './js/restaurant_info.js',
     './js/dbhelper.js',
-    './data/restaurants.json',
     './img/1.jpg',
     './img/2.jpg',
     './img/3.jpg',
