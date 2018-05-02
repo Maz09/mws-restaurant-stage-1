@@ -25,6 +25,24 @@ const fetchURL = `http://localhost:1337/restaurants`;
 let ArrayOfRestaurants = [];
 let dbPromise;
 
+function createDB(fetchingURL) {
+    fetch(fetchingURL)
+    .then(response => response.json())
+    .then(function(responses) {
+        ArrayOfRestaurants = responses.slice();
+    })
+    .catch(function(err) {
+        console.log('Fetch Error :-S', err);
+    });
+
+    idb.open('restaurants-reviews', 1, function(upgradeDB) {
+        let store = upgradeDB.createObjectStore('restaurants', { keyPath: 'id'});
+        ArrayOfRestaurants.forEach(function(restaurant) {
+            store.put(restaurant);
+          });
+        });
+}
+
 self.addEventListener('install', e => {
     e.waitUntil(
         caches.open(cacheName).then(cache => {
