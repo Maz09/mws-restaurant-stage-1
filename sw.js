@@ -23,7 +23,6 @@ let urlsToCache = [
 
 const fetchURL = `http://localhost:1337/restaurants`;
 let ArrayOfRestaurants = [];
-let dbPromise;
 
 function createDB(fetchingURL) {
     fetch(fetchingURL)
@@ -72,9 +71,13 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', event => {
     if (event.request.url === fetchURL){
         event.respondWith(
-            readDB()
-            .then(function (data_items) {
-                if (!data_items.length) {
+            idb.open('restaurants-reviews', 1).then(function(db) {
+                let tx = db.transaction(['restaurants'], 'readonly');
+                let store = tx.objectStore('restaurants');
+                return store.getAll();
+            })
+            .then(function(items) {
+                if (!items.length) {
                     return fetch(event.request)
                     .then(function (response) {
                         return response.clone().json()
@@ -92,7 +95,7 @@ self.addEventListener('fetch', event => {
                     });
                 } else {
                     console.log('event responds from DB');
-                    let response = new Response(JSON.stringify(data_items), {
+                    let response = new Response(JSON.stringify(items), {
                         headers: new Headers({
                             'Content-type': 'application/json',
                             'Access-Control-Allow-Credentials': 'true'
@@ -126,12 +129,4 @@ self.addEventListener('fetch', event => {
     .catch(error => {
       console.log('Request failed:', error);
     });
-  }
-
-  function readDB() {
-    idb.open('restaurants-reviews', 1).then(function(db) {
-      let tx = db.transaction(['restaurants'], 'readonly');
-      let store = tx.objectStore('restaurants');
-      return store.getAll();
-    })
   }
