@@ -5,11 +5,40 @@ class DBHelper {
   /**
    * Fetch all restaurants.
    */
+  
   static fetchRestaurants(callback) {
-    fetch(`http://localhost:1337/restaurants`)
-    .then(response => response.json())
-    .then(restaurants => callback(null, restaurants))
-    .catch(error => callback(error, null));
+    let db;
+    let request = indexedDB.open('Restaurant Reviews');
+    request.onerror = function(event) {
+      console.log('Restaurant Reviews was not opened correctly, we will fitch it from net');
+      fetch(`http://localhost:1337/restaurants`)
+      .then(response => response.json())
+      .then(restaurants => callback(null, restaurants))
+      .catch(error => callback(error, null));
+    };
+    
+    request.onupgradeneeded = function(event) {
+      const db = event.target.result;
+      db.createObjectStore('restaurants', { keyPath: 'id' });
+    };
+    
+    request.onsuccess = function(event) {
+      db = event.target.result;
+      let tx = db.transaction('restaurants', 'readonly');
+      let store = tx.objectStore('restaurants');
+      let rqst = store.getAll();
+      rqst.onerror = function(event) {
+        // Handle errors!
+        console.log('Error in retrieving data from restaurants, we will fitch it from net');
+        fetch(`http://localhost:1337/restaurants`)
+        .then(response => response.json())
+        .then(restaurants => callback(null, restaurants))
+        .catch(error => callback(error, null));
+      };
+      rqst.onsuccess = function(event) {
+        callback(null, event.target.result);
+      };
+    };
   }
 
   /**
