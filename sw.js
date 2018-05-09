@@ -1,5 +1,3 @@
-importScripts('idb.js');
-
 let cacheName = 'restaurant-cache-v2';
 let urlsToCache = [
     './',
@@ -22,25 +20,44 @@ let urlsToCache = [
 ];
 
 const fetchURL = `http://localhost:1337/restaurants`;
-let ArrayOfRestaurants = [];
 
-function createDB(fetchingURL) {
-    fetch(fetchingURL)
-    .then(response => response.json())
-    .then(function(responses) {
-        ArrayOfRestaurants = responses.slice();
-    })
-    .catch(function(err) {
-        console.log('Fetch Error :-S', err);
-    });
 
-    idb.open('restaurants-reviews', 1, function(upgradeDB) {
-        let store = upgradeDB.createObjectStore('restaurants', { keyPath: 'id'});
-        ArrayOfRestaurants.forEach(function(restaurant) {
-            store.put(restaurant);
-          });
-        });
+function createData(){
+    const openRequest = indexedDB.open("Restaurant Reviews", 1);
+    openRequest.onupgradeneeded = event => {
+        const db = event.target.result;
+        const store = db.createObjectStore('restaurants', { keyPath: 'id' });
+    };
+    
+    let db;
+    openRequest.onsuccess = event => {
+        db = event.target.result;
+        db.onerror = event => {
+            console.log(event);
+        };
+        
+        db.transaction('restaurants', 'readonly')
+        .objectStore('restaurants')
+        .count().onsuccess = e => {
+            //const count = e.target.result;
+            console.log('fetching and inserting data');
+            insertData();
+        };
+    };
+    function insertData() {
+        fetch(fetchURL)
+        .then(response => response.json())
+        .then(json => {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('restaurants', 'readwrite');
+                const store = tx.objectStore('restaurants');
+                json.forEach(p => store.put(p));
+                tx.oncomplete = e => resolve();
+            });
+        })
+    }
 }
+
 
 self.addEventListener('install', e => {
     e.waitUntil(
@@ -62,53 +79,16 @@ self.addEventListener('activate', e => {
     );
 });
 
-self.addEventListener('activate', e => {
+
+self.addEventListener("activate", e => {
     e.waitUntil(
-        createDB(fetchURL)
+        createData()
     );
 });
 
+
+
 self.addEventListener('fetch', event => {
-    if (event.request.url === fetchURL){
-        event.respondWith(
-            idb.open('restaurants-reviews', 1).then(function(db) {
-                let tx = db.transaction(['restaurants'], 'readonly');
-                let store = tx.objectStore('restaurants');
-                return store.getAll();
-            })
-            .then(function(items) {
-                if (!items.length) {
-                    return fetch(event.request)
-                    .then(function (response) {
-                        return response.clone().json()
-                        .then(json => {
-                            console.log('fetched from net');
-                            ArrayOfRestaurants = json.slice();
-                            idb.open('restaurants-reviews', 1, function(upgradeDB) {
-                                let store = upgradeDB.createObjectStore('restaurants', { keyPath: 'id'});
-                                ArrayOfRestaurants.forEach(function(restaurant) {
-                                    store.put(restaurant);
-                                });
-                            });
-                            return response;
-                        })
-                    });
-                } else {
-                    console.log('event responds from DB');
-                    let response = new Response(JSON.stringify(items), {
-                        headers: new Headers({
-                            'Content-type': 'application/json',
-                            'Access-Control-Allow-Credentials': 'true'
-                        }),
-                        type: 'cors',
-                        status: 200
-                    });
-                    return response;
-                }
-            })
-        );
-        return;
-    }
     event.respondWith(
         caches.match(event.request)
         .then(response => {
