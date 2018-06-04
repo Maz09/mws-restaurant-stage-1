@@ -329,3 +329,23 @@ nav h1 a {
 #restaurant-hours td {
   color: #666;
 }
+
+/* ---for new reviews form --- */
+#new-review {
+  padding: 30px 40px 80px;
+  margin: 5%;
+  width: 100%;
+}
+
+#name, #comment, #rating, #submit{
+  display: block;
+  margin-top: 8px;
+}
+
+#name, #comment {
+  width: 60%;
+}  
+
+#comment {
+  width: 85%;
+}
