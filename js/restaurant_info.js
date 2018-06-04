@@ -1,4 +1,5 @@
 let restaurant;
+let reviews;
 var map;
 
 /**
@@ -45,6 +46,27 @@ fetchRestaurantFromURL = (callback) => {
   }
 }
 
+/*
+ * fetch reviews
+ */
+fetchReviews = () => {
+  const id = getParameterByName('id');
+  if (!id) {
+    console.log('No ID in URL');
+    return;
+  }
+  DBHelper.fetchReviewsForCertainRestaurant(id, (err, reviews) => {
+    self.reviews = reviews;
+    if (err || !reviews) {
+      console.log('reviews fetch error', err);
+      return;
+    }
+    fillReviewsHTML();
+  });
+}
+
+
+
 /**
  * Create restaurant HTML and add it to the webpage
  */
@@ -68,7 +90,8 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     fillRestaurantHoursHTML();
   }
   // fill reviews
-  fillReviewsHTML();
+  //fillReviewsHTML();
+  fetchReviews();
 }
 
 /**
@@ -94,7 +117,7 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+fillReviewsHTML = (reviews = self.reviews) => {
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h3');
   title.innerHTML = 'Reviews';
@@ -123,7 +146,7 @@ createReviewHTML = (review) => {
   li.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  date.innerHTML = getDate(review.createdAt);
   li.appendChild(date);
 
   const rating = document.createElement('p');
@@ -161,4 +184,43 @@ getParameterByName = (name, url) => {
   if (!results[2])
     return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+getDate = (ts) => {
+  let date = new Date(ts);
+  return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
+}
+
+/* Managing reviews */
+let form = document.querySelector('#new-review');
+// listen to submit event
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  let rating = form.querySelector('#rating');
+  let review = {
+    restaurant_id: getParameterByName('id'),
+    name: form.querySelector('#name').value,
+    rating: rating.options[rating.selectedIndex].value,
+    comments: form.querySelector('#comment').value
+  };
+  console.log(review);
+  sendReviews(review);
+});
+
+function sendReviews(review) {
+  console.log("sending review", review);
+  // POST review
+  return fetch('http://localhost:1337/reviews', {
+    method: 'POST',
+    body: JSON.stringify(review),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  }).then(response => {
+    console.log(response);
+    return response.json();
+  }).then(data => {
+    console.log('added review', data);
+  });
 }
