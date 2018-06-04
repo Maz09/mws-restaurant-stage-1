@@ -146,7 +146,7 @@ createReviewHTML = (review) => {
   li.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = getDate(review.createdAt);
+  date.innerHTML = getreadableDate(review.createdAt);
   li.appendChild(date);
 
   const rating = document.createElement('p');
@@ -186,7 +186,7 @@ getParameterByName = (name, url) => {
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
 
-getDate = (ts) => {
+getreadableDate = (ts) => {
   let date = new Date(ts);
   return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
 }
