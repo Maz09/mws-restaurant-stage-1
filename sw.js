@@ -129,3 +129,66 @@ self.addEventListener('sync', function (event) {
     }
 });
 
+function openDataBase() {
+    return new Promise(function(resolve, reject) {
+        let req = indexedDB.open('review', 1);
+        req.onsuccess = function (event) { resolve(req.result); }
+        req.onerror = reject;
+      });
+  }
+
+  function sendAndDeleteMessage(id) {
+    return getMessage(id).then(sendRequest).then(function() {
+      return deleteMessage(id);
+    });
+  }
+
+  function getMessage(id) {
+    return openDataBase().then(function(db) {
+        return new Promise(function(resolve, reject) {
+            let transaction = db.transaction('outbox', 'readonly');
+            let store = transaction.objectStore('outbox');
+            let req = store.get(id);
+            req.onsuccess = function() { resolve(req.result); }
+            req.onerror = reject;
+        });
+      });
+  }
+
+  function getAllMessages() {
+    return openDataBase().then(function(db) {
+        return new Promise(function(resolve, reject) {
+            let transaction = db.transaction('outbox', 'readonly');
+            let store = transaction.objectStore('outbox');
+            let req = store.getAll();
+            req.onsuccess = function() { resolve(req.result); }
+            req.onerror = reject;
+        });
+      });
+  }
+
+  function sendRequest(request) {
+    if (!request)
+      return Promise.resolve();
+    return fetch('http://localhost:1337/reviews', {
+                method: 'POST',
+                body: JSON.stringify(request),
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+             }
+            })
+  }
+
+  function deleteMessage(id) {
+    return openDataBase().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          let transaction = db.transaction('outbox', 'readwrite');
+          let store = transaction.objectStore('outbox');
+          let req = store.delete(id);
+          req.onsuccess = resolve;
+          req.onerror = reject;
+        });
+      });
+  }
+  
