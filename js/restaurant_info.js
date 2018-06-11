@@ -65,7 +65,19 @@ fetchReviews = () => {
   });
 }
 
-
+/*
+ * set favorite button
+ */
+setFavoriteButton = (status) => {
+  const favorite = document.getElementById('favBtn');
+  if (status === 'true') {
+    favorite.title = 'Restaurant is Favorite';
+    favorite.innerHTML = '⭐️⭐️⭐️⭐️⭐️ Unfavorite';
+  } else {
+    favorite.title = 'Restaurant is not Favorite';
+    favorite.innerHTML = '☆☆☆☆☆ Favorite';
+  }
+}
 
 /**
  * Create restaurant HTML and add it to the webpage
@@ -76,6 +88,9 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
+
+  // favorite
+  setFavoriteButton(restaurant.is_favorite);
 
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img'
