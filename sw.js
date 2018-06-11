@@ -203,3 +203,64 @@ function openDataBase() {
         });
       });
   }
+
+////  Dealing with favorite.
+  
+function openFavoriteDataBase() {
+    return new Promise(function(resolve, reject) {
+        let req = indexedDB.open('favorite', 1);
+        req.onsuccess = function (event) { resolve(req.result); }
+        req.onerror = reject;
+      });
+  }
+
+  function getAllFavorites() {
+    return openFavoriteDataBase().then(function(db) {
+        return new Promise(function(resolve, reject) {
+            let transaction = db.transaction('outbox', 'readonly');
+            let store = transaction.objectStore('outbox');
+            let req = store.getAll();
+            req.onsuccess = function() { resolve(req.result); }
+            req.onerror = reject;
+        });
+      });
+  }
+
+  function getFavorite(id) {
+    return openFavoriteDataBase().then(function(db) {
+        return new Promise(function(resolve, reject) {
+            let transaction = db.transaction('outbox', 'readonly');
+            let store = transaction.objectStore('outbox');
+            let req = store.get(id);
+            req.onsuccess = function() { resolve(req.result); }
+            req.onerror = reject;
+        });
+      });
+  }
+
+  function sendRequestFavorite(request) {
+    if (!request)
+      return Promise.resolve();
+    return fetch(`http://localhost:1337/restaurants/${request.resId}/?is_favorite=${request.favorite}`, {method: 'PUT'})
+}
+
+
+function deleteFavorite(id) {
+    return openFavoriteDataBase().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          let transaction = db.transaction('outbox', 'readwrite');
+          let store = transaction.objectStore('outbox');
+          let req = store.delete(id);
+          req.onsuccess = resolve;
+          req.onerror = reject;
+        });
+      });
+  }
+
+
+  function sendAndDeleteFavorite(id) {
+    return getFavorite(id).then(sendRequestFavorite).then(function() {
+      return deleteFavorite(id);
+    });
+  }
+  
