@@ -110,3 +110,22 @@ self.addEventListener('fetch', event => {
       console.log('Request failed:', error);
     });
   }
+
+///========= synchronization for reviews and favorites ================/
+
+self.addEventListener('sync', function (event) {
+    if (event.tag === 'sync') {
+        event.waitUntil(
+            getAllMessages().then(reviews => {
+                return Promise.all(
+                    reviews.map(review => sendAndDeleteMessage(review.id))
+                )
+            }).then(() => {
+                console.log('synced');
+            }).catch(err => {
+                console.log(err, 'error while syncing');
+            })
+        );
+    }
+});
+
