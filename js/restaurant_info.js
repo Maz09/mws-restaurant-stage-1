@@ -191,36 +191,52 @@ getreadableDate = (ts) => {
   return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
 }
 
-/* Managing reviews */
-let form = document.querySelector('#new-review');
-// listen to submit event
-form.addEventListener('submit', e => {
-  e.preventDefault();
-  let rating = form.querySelector('#rating');
-  let review = {
-    restaurant_id: getParameterByName('id'),
-    name: form.querySelector('#name').value,
-    rating: rating.options[rating.selectedIndex].value,
-    comments: form.querySelector('#comment').value
-  };
-  console.log(review);
-  sendReviews(review);
-});
-
-function sendReviews(review) {
-  console.log("sending review", review);
-  // POST review
-  return fetch('http://localhost:1337/reviews', {
-    method: 'POST',
-    body: JSON.stringify(review),
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
-  }).then(response => {
-    console.log(response);
-    return response.json();
-  }).then(data => {
-    console.log('added review', data);
+/* Dealing with reviews */
+navigator.serviceWorker.ready.then(function (swRegistration) {
+  let form = document.querySelector('#review-form');
+  // listen to submit event
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    let rating = form.querySelector('#rating');
+    let review = {
+      restaurant_id: getParameterByName('id'),
+      name: form.querySelector('#name').value,
+      rating: rating.options[rating.selectedIndex].value,
+      comments: form.querySelector('#comment').value
+    };
+    console.log(review);
+    //save to DataBase
+    let db;
+    let openRequest = indexedDB.open('review', 1);
+    
+    openRequest.onupgradeneeded = function(e) {
+      let db = e.target.result;
+      console.log('running onupgradeneeded');
+      if (!db.objectStoreNames.contains('outbox')) {
+        db.createObjectStore('outbox', {autoIncrement: true, keyPath: 'id'});
+      }
+    };
+    
+    openRequest.onsuccess = function(e) {
+      console.log('running onsuccess');
+      db = e.target.result;
+      addRevew();
+    };
+    
+    function addRevew(){
+      let transaction = db.transaction('outbox', 'readwrite');
+      let store = transaction.objectStore('outbox');
+      let request = store.put(review);
+      request.onerror = function(e) {
+        console.log('Error', e.target.error.name);
+      };
+      request.onsuccess = function() {
+        form.reset();
+        return swRegistration.sync.register('sync').then(() => {
+          console.log('sync was registered');
+        })
+      };
+    };
+  
   });
-}
+});
