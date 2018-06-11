@@ -126,6 +126,18 @@ self.addEventListener('sync', function (event) {
                 console.log(err, 'error while syncing');
             })
         );
+    }else if (event.tag === 'favorite') {
+        event.waitUntil(
+            getAllFavorites().then(favorites => {
+                return Promise.all(
+                    favorites.map(favorite => sendAndDeleteFavorite(favorite.id))
+                )
+            }).then(() => {
+                console.log('favorites were synced');
+            }).catch(err => {
+                console.log(err, 'error while syncing favorites');
+            })
+        );
     }
 });
 
@@ -191,4 +203,3 @@ function openDataBase() {
         });
       });
   }
-  
