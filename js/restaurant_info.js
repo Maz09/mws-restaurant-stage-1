@@ -255,3 +255,58 @@ navigator.serviceWorker.ready.then(function (swRegistration) {
   
   });
 });
+
+/* Dealing with favorites */
+navigator.serviceWorker.ready.then(function (swRegistration) {
+  let btn = document.getElementById('favBtn');
+  // listen to click event
+  btn.addEventListener('click', e => {
+    let opposite;
+    if(self.restaurant.is_favorite === 'true'){
+      opposite = false;
+    }else{
+      opposite = true;
+    };
+    console.log('clicked');
+    let res = {
+      resId: getParameterByName('id'),
+      favorite: opposite
+    };
+    
+    // save to DataBase
+    let db;
+    let openRequest = indexedDB.open('favorite', 1);
+    
+    openRequest.onupgradeneeded = function(e) {
+      let db = e.target.result;
+      console.log('running onupgradeneeded');
+      if (!db.objectStoreNames.contains('outbox')) {
+        db.createObjectStore('outbox', {autoIncrement: true, keyPath: 'id'});
+      }
+    };
+    
+    openRequest.onsuccess = function(e) {
+      console.log('running onsuccess');
+      db = e.target.result;
+      setFavorite();
+    };
+
+    function setFavorite(){
+      let transaction = db.transaction('outbox', 'readwrite');
+      let store = transaction.objectStore('outbox');
+      let request = store.put(res);
+      request.onerror = function(e) {
+        console.log('Error', e.target.error.name);
+      };
+      request.onsuccess = function() {
+        setFavoriteButton(opposite);
+        self.restaurant.is_favorite = opposite;
+        return swRegistration.sync.register('favorite').then(() => {
+          console.log('Favorite Sync registered');
+        })
+      };
+    };
+  
+  });
+});
+
