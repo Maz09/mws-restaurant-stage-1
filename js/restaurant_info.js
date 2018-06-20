@@ -68,14 +68,17 @@ fetchReviews = () => {
 /*
  * set favorite button
  */
-setFavoriteButton = (status) => {
-  const favorite = document.getElementById('favBtn');
+setFavoriteButton = (status) => { 
+  const favorite = document.getElementById("favBtn");
+  const strs = document.getElementById("stars");
   if (status === 'true') {
     favorite.title = 'Restaurant is Favorite';
-    favorite.innerHTML = '⭐️⭐️⭐️⭐️⭐️ Unfavorite';
-  } else {
+    favorite.innerHTML = 'Unfavorite this restaurant'; // ⭐️⭐️⭐️⭐️⭐️
+    strs.style.display = "inline";
+  } else if (status === 'false'){
     favorite.title = 'Restaurant is not Favorite';
-    favorite.innerHTML = '☆☆☆☆☆ Favorite';
+    favorite.innerHTML = 'Favorite this restaurant'; //☆☆☆☆☆
+    strs.style.display = "none";
   }
 }
 
@@ -86,11 +89,20 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
 
+  const favorite = document.getElementById("favBtn");
+  const strs = document.getElementById("stars");
+  if (self.restaurant.is_favorite === 'true') {
+    favorite.title = 'Restaurant is Favorite';
+    favorite.innerHTML = 'Unfavorite this restaurant';
+    strs.style.display = "inline";
+  } else if (self.restaurant.is_favorite === 'false'){
+    favorite.title = 'Restaurant is not Favorite';
+    favorite.innerHTML = 'Favorite this restaurant';
+    strs.style.display = "none";
+  }
+
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
-
-  // favorite
-  setFavoriteButton(restaurant.is_favorite);
 
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img'
@@ -235,10 +247,6 @@ navigator.serviceWorker.ready.then(function (swRegistration) {
     openRequest.onsuccess = function(e) {
       console.log('running onsuccess');
       db = e.target.result;
-      addRevew();
-    };
-    
-    function addRevew(){
       let transaction = db.transaction('outbox', 'readwrite');
       let store = transaction.objectStore('outbox');
       let request = store.put(review);
@@ -252,7 +260,6 @@ navigator.serviceWorker.ready.then(function (swRegistration) {
         })
       };
     };
-  
   });
 });
 
@@ -263,9 +270,9 @@ navigator.serviceWorker.ready.then(function (swRegistration) {
   btn.addEventListener('click', e => {
     let opposite;
     if(self.restaurant.is_favorite === 'true'){
-      opposite = false;
+      opposite = 'false';
     }else{
-      opposite = true;
+      opposite = 'true';
     };
     console.log('clicked');
     let res = {
@@ -288,10 +295,6 @@ navigator.serviceWorker.ready.then(function (swRegistration) {
     openRequest.onsuccess = function(e) {
       console.log('running onsuccess');
       db = e.target.result;
-      setFavorite();
-    };
-
-    function setFavorite(){
       let transaction = db.transaction('outbox', 'readwrite');
       let store = transaction.objectStore('outbox');
       let request = store.put(res);
@@ -301,12 +304,12 @@ navigator.serviceWorker.ready.then(function (swRegistration) {
       request.onsuccess = function() {
         setFavoriteButton(opposite);
         self.restaurant.is_favorite = opposite;
+        console.log('restaurant.is_favorite', self.restaurant.is_favorite);
         return swRegistration.sync.register('favorite').then(() => {
           console.log('Favorite Sync registered');
         })
       };
     };
-  
   });
 });
 
