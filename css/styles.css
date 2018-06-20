@@ -349,3 +349,16 @@ nav h1 a {
 #comment {
   width: 85%;
 }
+
+/* for favorite button ----------- */
+#stars {
+  display: none;
+  padding: 15%;
+  color: tomato;
+  font-size: 24pt;
+}
+
+.strsMain{
+  color: tomato;
+  text-align: center;
+}
