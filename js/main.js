@@ -163,6 +163,15 @@ createRestaurantHTML = (restaurant) => {
   more.setAttribute('aria-label', 'The Details of ' + restaurant.name);    
   li.append(more)
 
+  const favStars = document.createElement('p');
+  favStars.className = 'strsMain';
+  if(restaurant.is_favorite === "true"){
+    favStars.innerHTML = "FAVORITE ⭐️️️️️⭐️️️️️⭐️️️️️⭐️️️️️⭐️️️️";
+  }else if(restaurant.is_favorite === "false"){
+    favStars.innerHTML ="";
+  }
+  li.append(favStars)
+  
   return li
 }
 
