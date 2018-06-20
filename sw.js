@@ -190,6 +190,9 @@ function openDataBase() {
                   'Content-Type': 'application/json'
              }
             })
+            .then(function(response) {
+                return response.json();
+            })
   }
 
   function deleteMessage(id) {
@@ -242,6 +245,10 @@ function openFavoriteDataBase() {
     if (!request)
       return Promise.resolve();
     return fetch(`http://localhost:1337/restaurants/${request.resId}/?is_favorite=${request.favorite}`, {method: 'PUT'})
+    .then(response => {
+        console.log(response);
+        return response.json();
+    })
 }
 
 
