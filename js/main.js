@@ -2,7 +2,8 @@ let restaurants,
   neighborhoods,
   cuisines
 var map
-var markers = []
+var markers = [];
+var lazy = [];
 
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
@@ -144,6 +145,7 @@ createRestaurantHTML = (restaurant) => {
   image.src = '/img/1.jpg';
   image.alt = "The " + restaurant.name + " Restaurant";
   li.append(image);
+  lazy.push(image);
 
   const name = document.createElement('h2');
   name.innerHTML = restaurant.name;
