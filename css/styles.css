@@ -169,6 +169,7 @@ nav h1 a {
   /* adding flex properties to make two images in a row for bigger screens */ 
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-around;
   /* -------------- */    
   background-color: #f3f3f3;
   list-style: outside none none;
