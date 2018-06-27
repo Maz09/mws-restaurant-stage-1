@@ -81,7 +81,12 @@ window.initMap = () => {
     center: loc,
     scrollwheel: false
   });
-  updateRestaurants();
+
+  // Remove all map markers
+  self.markers.forEach(m => m.setMap(null));
+  self.markers = [];
+
+  addMarkersToMap();
 }
 
 /**
@@ -116,9 +121,6 @@ resetRestaurants = (restaurants) => {
   const ul = document.getElementById('restaurants-list');
   ul.innerHTML = '';
 
-  // Remove all map markers
-  self.markers.forEach(m => m.setMap(null));
-  self.markers = [];
   self.restaurants = restaurants;
 }
 
@@ -130,7 +132,6 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant => {
     ul.append(createRestaurantHTML(restaurant));
   });
-  addMarkersToMap();
 }
 
 /**
@@ -190,3 +191,5 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     self.markers.push(marker);
   });
 }
+
+updateRestaurants();
