@@ -83,16 +83,9 @@
   
   <script>
     // for lazy loading from Robin Osborne
-    var lazy = [];
-    registerListener('load', setLazy);
     registerListener('load', lazyLoad);
     registerListener('scroll', lazyLoad);
     registerListener('resize', lazyLoad);
-    
-    function setLazy(){
-      lazy = document.getElementsByClassName('lazy');
-      console.log('Found ' + lazy.length + ' lazy images');
-    }
      
     function lazyLoad(){
       for(var i=0; i<lazy.length; i++){
