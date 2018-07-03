@@ -310,6 +310,28 @@ navigator.serviceWorker.ready.then(function (swRegistration) {
         })
       };
     };
+    // update restaurants indexedDB
+    let restaurants_db;
+    let openRequest2 = indexedDB.open('Restaurant Reviews', 1);
+    openRequest2.onsuccess = function(e) {
+      console.log('running onsuccess to update restaurants indexedDB');
+      restaurants_db = e.target.result;
+      let transaction2 = restaurants_db.transaction('restaurants', 'readwrite');
+      let store2 = transaction2.objectStore('restaurants');
+      let restaurant_id = parseInt(getParameterByName('id'));
+      let request2 = store2.get(restaurant_id);
+      request2.onerror = function(e) {
+        console.log('Error', e.target.error.name);
+      };
+      request2.onsuccess = function() {
+        var data = request2.result;
+        data.is_favorite = opposite;
+        var request3 = store2.put(data);
+        request3.onsuccess = function(){
+          console.log("data after: ",data);
+        };
+      };
+    };
   });
 });
 
