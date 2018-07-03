@@ -170,7 +170,7 @@ createRestaurantHTML = (restaurant) => {
   favStars.className = 'strsMain';
   if(restaurant.is_favorite === "true"){
     favStars.innerHTML = "FAVORITE ⭐️️️️️⭐️️️️️⭐️️️️️⭐️️️️️⭐️️️️";
-  }else if(restaurant.is_favorite === "false"){
+  }else {
     favStars.innerHTML ="";
   }
   li.append(favStars)
