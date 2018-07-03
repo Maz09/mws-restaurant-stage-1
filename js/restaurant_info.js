@@ -231,6 +231,7 @@ navigator.serviceWorker.ready.then(function (swRegistration) {
   // listen to submit event
   form.addEventListener('submit', e => {
     e.preventDefault();
+    let review_date = new Date();
     let rating = form.querySelector('#rating');
     let review = {
       restaurant_id: getParameterByName('id'),
@@ -261,7 +262,52 @@ navigator.serviceWorker.ready.then(function (swRegistration) {
         console.log('Error', e.target.error.name);
       };
       request.onsuccess = function() {
+        // creating a copy of the submitted review
+        let identical_review = {
+          restaurant_id: getParameterByName('id'),
+          name: form.querySelector('#name').value,
+          rating: rating.options[rating.selectedIndex].value,
+          comments: form.querySelector('#comment').value,
+          createdAt: review_date.getDate() + '/' + (review_date.getMonth() + 1) + '/' + review_date.getFullYear()
+        };
         form.reset();
+        
+        // Adding the review to the restaurant's indexedDB reviews
+        let id = getParameterByName('id');
+        let rev_request = indexedDB.open('Restaurant-' + id + '-Reviews');
+        rev_request.onsuccess = function(event) {
+          let rv_tx = rev_request.result.transaction('rest-' + id + '-rev', 'readwrite');
+          let rv_str = rv_tx.objectStore('rest-' + id + '-rev');
+          let rv_rqst = rv_str.add(identical_review);
+          rv_rqst.onerror = function(e) {
+            console.log('Error adding the review to indexedDB', e.target.error.name);
+          };
+          rv_rqst.onsuccess = function() {
+            console.log('Adding the review to indexedDB');
+          }
+        }
+        // Add the submitted review to the restaurant's page. 
+        const rev_lst = document.getElementById('reviews-list');
+
+        const lst_itm = document.createElement('li');
+        const rev_name = document.createElement('p');
+        rev_name.innerHTML = review.name;
+        lst_itm.appendChild(rev_name);
+
+        const rev_date = document.createElement('p');
+        rev_date.innerHTML = review_date.getDate() + '/' + (review_date.getMonth() + 1) + '/' + review_date.getFullYear();
+        lst_itm.appendChild(rev_date);
+
+        const rev_rating = document.createElement('p');
+        rev_rating.innerHTML = `Rating: ${review.rating}`;
+        lst_itm.appendChild(rev_rating);
+
+        const rev_comments = document.createElement('p');
+        rev_comments.innerHTML = review.comments;
+        lst_itm.appendChild(rev_comments);
+
+        rev_lst.appendChild(lst_itm);
+
         return swRegistration.sync.register('sync').then(() => {
           console.log('sync was registered');
         })
