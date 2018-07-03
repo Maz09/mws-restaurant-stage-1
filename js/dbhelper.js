@@ -180,20 +180,97 @@ class DBHelper {
     return marker;
   }
 
+  
+  
+  // inserting the restaurant's reviews in indexedDB to be stored and used later.
+  static insertRestaurantReviews(id){
+    let rev_db;
+    let rev_request = indexedDB.open('Restaurant-' + id + '-Reviews');
+    rev_request.onerror = function(event) {
+      console.log('Restaurant Reviews was not opened correctly.');
+    };
+    rev_request.onupgradeneeded = function(event) {
+      const db = event.target.result;
+      db.createObjectStore('rest-' + id + '-rev', { autoIncrement: true, keyPath: 'rev_id' });
+    };
+    rev_request.onsuccess = function(event) {
+      rev_db = event.target.result;
+      let rev_tx = rev_db.transaction('rest-' + id + '-rev', 'readonly');
+      let rev_store = rev_tx.objectStore('rest-' + id + '-rev');
+      let rev_rqst = rev_store.getAll();
+      rev_rqst.onerror = function(event) {
+        // Handle errors!
+        console.log('Error in retrieving data from restaurants');
+      };
+      rev_rqst.onsuccess = function(event) {
+        if (!rev_rqst.result.length){
+          fetch('http://localhost:1337/reviews/?restaurant_id=' + id)
+        .then(response => response.json())
+        .then(json => {
+            return new Promise((resolve, reject) => {
+                const tx = rev_db.transaction('rest-' + id + '-rev', 'readwrite');
+                const store = tx.objectStore('rest-' + id + '-rev');
+                json.forEach(p => store.put(p));
+                tx.oncomplete = e => resolve();
+            });
+        })
+        };
+      };
+    };
+  }
+
+  
   static fetchReviewsForCertainRestaurant(id, callback) {
-    fetch('http://localhost:1337/reviews/?restaurant_id=' + id).then(response => {
-      if (response.status === 200) {
-        response.json().then(json => {
-          callback(null, json);
+    let rev_db;
+    let rev_request = indexedDB.open('Restaurant-' + id + '-Reviews');
+    rev_request.onerror = function(event) {
+        console.log('Restaurant Reviews was not opened correctly, we will fitch it from net');
+        fetch('http://localhost:1337/reviews/?restaurant_id=' + id)
+        .then(response => {
+          if (response.status === 200) {
+            response.json().then(json => {
+              callback(null, json);
+            }).catch(err => {
+              callback(err, null);
+            });
+          } else {
+            callback(`Failed. Returned status is ${response.status}`, null);
+          }
         }).catch(err => {
           callback(err, null);
         });
-      } else {
-        callback(`Failed. Returned status is ${response.status}`, null);
-      }
-    }).catch(err => {
-      callback(err, null);
-    });
-  }
+      };
+      
+      rev_request.onupgradeneeded = function(event) {
+        const db = event.target.result;
+        db.createObjectStore('rest-' + id + '-rev', { autoIncrement: true, keyPath: 'rev_id' });
+      };
+      
+      rev_request.onsuccess = function(event) {
+        rev_db = event.target.result;
+        let rev_tx = rev_db.transaction('rest-' + id + '-rev', 'readonly');
+        let rev_store = rev_tx.objectStore('rest-' + id + '-rev');
+        let rev_rqst = rev_store.getAll();
+        rev_rqst.onerror = function(event) {
+          // Handle errors!
+          console.log('Error in retrieving data from restaurants, we will fitch it from net');
+          fetch('http://localhost:1337/reviews/?restaurant_id=' + id)
+          .then(response => response.json())
+          .then(restaurants => callback(null, restaurants))
+          .catch(error => callback(error, null));
+        };
+        rev_rqst.onsuccess = function(event) {
+          if (!rev_rqst.result.length){
+            console.log('indexedDB of this restaurant is empty, we will fitch it from net');
+            fetch('http://localhost:1337/reviews/?restaurant_id=' + id)
+            .then(response => response.json())
+            .then(restaurants => callback(null, restaurants))
+            .catch(error => callback(error, null));
+          }else{
+            callback(null, event.target.result);
+          };
+        };
+      };
+    }
 
 }
