@@ -40,11 +40,18 @@ fetchRestaurantFromURL = (callback) => {
         console.error(error);
         return;
       }
+      putReviewsInIndexedDB(id);
       fillRestaurantHTML();
       callback(null, restaurant)
     });
   }
 }
+
+/// put this restaurant's reviews in indexedDB
+putReviewsInIndexedDB = (id) => {
+  DBHelper.insertRestaurantReviews(id);
+}
+
 
 /*
  * fetch reviews
